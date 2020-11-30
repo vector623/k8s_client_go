@@ -1,4 +1,4 @@
-module github.com/SUPPLYcom/k8s_client_go
+module github.com/vector623/k8s_client_go
 
 go 1.15
 
