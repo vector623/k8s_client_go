@@ -25,6 +25,5 @@ func (c *Client) ListIngresses(namespace string) ([]v1beta1.Ingress, error) {
 		return nil, err
 	}
 
-	//return ingresses.Items, nil
 	return filteredIngresses, nil
 }

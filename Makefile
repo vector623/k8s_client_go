@@ -51,10 +51,14 @@ clean:
 az-login:
 	az login
 
-az-set-subscription:
+connect-dev:
 	az account set --subscription="b54f955a-67c4-4680-888e-17bf609fe9c2"
-
-k8s-login:
 	az aks get-credentials --name "feidsupplyaks001" --resource-group "feideu2-supplyaks-rg-001" --overwrite-existing
 	kubectl config use-context "feidsupplyaks001"
+	kubectl get namespaces
+
+connect-sandbox:
+	az account set --subscription="8d01f77a-4a6f-4548-b5f3-743769a1b178"
+	az aks get-credentials --name "tfprovtest" --resource-group "feiseu2-supply-rg-001" --overwrite-existing
+	kubectl config use-context "tfprovtest"
 	kubectl get namespaces
