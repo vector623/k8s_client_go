@@ -2,6 +2,7 @@ package k8s_client_go
 
 import (
 	"errors"
+	"gopkg.in/yaml.v2"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/azure"
 	"k8s.io/client-go/tools/clientcmd"
@@ -34,24 +35,28 @@ func NewClient(apihost, kubeconfig string) (*Client, error) {
 	return &newclient, nil
 }
 
-func GenerateKubeConf(serverUrl, clientCertificateData, clientKeyData, token  string) (AksCreds, error) {
+func GenerateKubeConf(name, serverUrl, clientCertificateData, clientKeyData, token  string) (string, error) {
 	aksCreds := AksCreds{
-		name: "",
-		user: struct {
-			client_certificate_data string
-			client_key_data         string
-			token                   string
-		}{},
+		Name: name,
+		User: User{
+			ClientCertificateData: clientCertificateData,
+			ClientKeyData:         clientKeyData,
+			Token:                   token,
+		},
 	}
 
-	return aksCreds, errors.New("tba")
+	aksCredsYaml, _ := yaml.Marshal(aksCreds)
+	aksCredsYamlStr := string(aksCredsYaml)
+	return aksCredsYamlStr, errors.New("tba")
+}
+
+type User struct {
+	ClientCertificateData string
+	ClientKeyData         string
+	Token                 string
 }
 
 type AksCreds struct {
-	name string
-	user struct {
-		client_certificate_data string
-		client_key_data string
-		token string
-	}
+	Name string
+	User User
 }
