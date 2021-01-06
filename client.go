@@ -19,7 +19,7 @@ type Client struct {
 	K8sClientSet *kubernetes.Clientset
 }
 
-func NewClient(apihost, kubeconfig string) (*Client, error) {
+func NewClientFromKubeFile(apihost, kubeconfig string) (*Client, error) {
 	config, configErr := clientcmd.BuildConfigFromFlags(apihost, kubeconfig)
 	if(configErr != nil) {
 		return nil, configErr
@@ -37,7 +37,27 @@ func NewClient(apihost, kubeconfig string) (*Client, error) {
 	return &newclient, nil
 }
 
-func GenerateKubeConf(name, serverUrl, clientCertificateData, clientKeyData, token  string) (string, error) {
+func NewClientFromKubeCreds(apihost, clusterName, clientCertificateData, clientKeyData, token string) (*Client, error) {
+	tmpKubeConf, _ := GenerateKubeConfTempFile(clusterName, clientCertificateData, clientKeyData, token)
+
+	config, configErr := clientcmd.BuildConfigFromFlags(apihost, tmpKubeConf.Name())
+	if(configErr != nil) {
+		return nil, configErr
+	}
+	clientset, clientsetErr := kubernetes.NewForConfig(config)
+	if(clientsetErr != nil) {
+		return nil, clientsetErr
+	}
+
+	newclient := Client{
+		HostURL: apihost,
+		K8sClientSet: clientset,
+	}
+
+	return &newclient, nil
+}
+
+func GenerateKubeConf(name, clientCertificateData, clientKeyData, token  string) (string, error) {
 	aksCreds := AksCreds{
 		Name: name,
 		User: struct {
@@ -57,7 +77,7 @@ func GenerateKubeConf(name, serverUrl, clientCertificateData, clientKeyData, tok
 	return aksCredsYamlStr, nil
 }
 
-func GenerateKubeConfTempFile(name, serverUrl, clientCertificateData, clientKeyData, token string) (*os.File, error) {
+func GenerateKubeConfTempFile(name, clientCertificateData, clientKeyData, token string) (*os.File, error) {
 	aksCreds := AksCreds{
 		Name: name,
 		User: struct {
