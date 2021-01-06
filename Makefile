@@ -5,9 +5,8 @@ HOSTNAME=supply.com
 NAMESPACE=devops
 NAME=k8s_client_go
 BINARY=${NAME}
-VERSION=0.2
+VERSION=1.3
 OS_ARCH=darwin_amd64
-VERSION=0.2
 
 go.mod:
 	go mod init k8s_client_go
