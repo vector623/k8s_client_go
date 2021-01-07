@@ -37,8 +37,8 @@ func NewClientFromKubeFile(apihost, kubeconfig string) (*Client, error) {
 	return &newclient, nil
 }
 
-func NewClientFromKubeCreds(apihost, clusterName, clientCertificateData, clientKeyData, token string) (*Client, error) {
-	tmpKubeConf, _ := GenerateKubeConfTempFile(clusterName, clientCertificateData, clientKeyData, token)
+func NewClientFromKubeCreds(apihost, clusterName, clientCertificateAuthority, clientCertificateData, clientKeyData, token string) (*Client, error) {
+	tmpKubeConf, _ := GenerateKubeConfTempFile(clusterName, clientCertificateAuthority, clientCertificateData, clientKeyData, token)
 
 	config, configErr := clientcmd.BuildConfigFromFlags(apihost, tmpKubeConf.Name())
 	if(configErr != nil) {
@@ -57,14 +57,16 @@ func NewClientFromKubeCreds(apihost, clusterName, clientCertificateData, clientK
 	return &newclient, nil
 }
 
-func GenerateKubeConf(name, clientCertificateData, clientKeyData, token  string) (string, error) {
+func GenerateKubeConf(name, clientCertificateAuthority, clientCertificateData, clientKeyData, token  string) (string, error) {
 	aksCreds := AksCreds{
 		Name: name,
 		User: struct {
+			ClientCertificateAuthority string `yaml:"client-certificate-authority"`
 			ClientCertificateData string `yaml:"client-certificate-data"`
 			ClientKeyData         string `yaml:"client-key-data"`
 			Token                 string
 		}{
+			ClientCertificateAuthority: clientCertificateAuthority,
 			ClientCertificateData: clientCertificateData,
 			ClientKeyData: clientKeyData,
 			Token: token,
@@ -77,14 +79,16 @@ func GenerateKubeConf(name, clientCertificateData, clientKeyData, token  string)
 	return aksCredsYamlStr, nil
 }
 
-func GenerateKubeConfTempFile(name, clientCertificateData, clientKeyData, token string) (*os.File, error) {
+func GenerateKubeConfTempFile(name, clientCertificateAuthority, clientCertificateData, clientKeyData, token string) (*os.File, error) {
 	aksCreds := AksCreds{
 		Name: name,
 		User: struct {
+			ClientCertificateAuthority string `yaml:"client-certificate-authority"`
 			ClientCertificateData string `yaml:"client-certificate-data"`
 			ClientKeyData         string `yaml:"client-key-data"`
 			Token                 string
 		}{
+			ClientCertificateAuthority: clientCertificateAuthority,
 			ClientCertificateData: clientCertificateData,
 			ClientKeyData: clientKeyData,
 			Token: token,
@@ -108,6 +112,7 @@ func GenerateKubeConfTempFile(name, clientCertificateData, clientKeyData, token 
 type AksCreds struct {
 	Name string
 	User struct {
+		ClientCertificateAuthority string `yaml:"client-certificate-authority"`
 		ClientCertificateData string `yaml:"client-certificate-data"`
 		ClientKeyData         string `yaml:"client-key-data"`
 		Token                 string
